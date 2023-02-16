@@ -6,6 +6,7 @@ import flight.reservation.flight.ScheduledFlight;
 import flight.reservation.order.FlightOrder;
 import flight.reservation.payment.CreditCard;
 import flight.reservation.plane.Helicopter;
+import flight.reservation.plane.HelicopterFactory;
 import flight.reservation.plane.PassengerPlane;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -57,7 +58,7 @@ public class ScenarioTest {
             @Test
             @DisplayName("then the flight should not be available")
             void thenFlightNotAvailable() {
-                assertThrows(IllegalArgumentException.class, () -> new Flight(1, startAirport, destinationAirport, new Helicopter("H1")));
+                assertThrows(IllegalArgumentException.class, () -> new Flight(1, startAirport, destinationAirport, HelicopterFactory.getHelicopter("H1")));
             }
 
         }
@@ -70,7 +71,7 @@ public class ScenarioTest {
             public void initFlights() {
                 startAirport = new Airport("John F. Kennedy International Airport", "JFK", "Queens, New York, New York");
                 destinationAirport = new Airport("Frankfurt Airport", "FRA", "Frankfurt, Hesse");
-                flight = new Flight(1, startAirport, destinationAirport, new Helicopter("H1"));
+                flight = new Flight(1, startAirport, destinationAirport, HelicopterFactory.getHelicopter("H1"));
                 Date departure = TestUtil.addDays(Date.from(Instant.now()), 3);
                 schedule.scheduleFlight(flight, departure);
             }

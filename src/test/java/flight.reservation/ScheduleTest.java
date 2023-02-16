@@ -4,6 +4,7 @@ import flight.reservation.flight.Flight;
 import flight.reservation.flight.Schedule;
 import flight.reservation.flight.ScheduledFlight;
 import flight.reservation.plane.Helicopter;
+import flight.reservation.plane.HelicopterFactory;
 import flight.reservation.plane.PassengerDrone;
 import flight.reservation.plane.PassengerPlane;
 import org.junit.jupiter.api.BeforeEach;
@@ -127,7 +128,7 @@ public class ScheduleTest {
                 new Flight(2, airports.get(1), airports.get(2), new PassengerPlane("A380")),
                 new Flight(3, airports.get(2), airports.get(4), new PassengerPlane("Embraer 190")),
                 new Flight(4, airports.get(3), airports.get(2), new PassengerPlane("Antonov AN2")),
-                new Flight(5, airports.get(4), airports.get(2), new Helicopter("H1")),
+                new Flight(5, airports.get(4), airports.get(2), HelicopterFactory.getHelicopter("H1")),
                 new Flight(6, airports.get(5), airports.get(7), new PassengerDrone("HypaHype"))
         );
 
