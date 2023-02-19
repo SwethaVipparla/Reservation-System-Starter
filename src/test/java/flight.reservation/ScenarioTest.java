@@ -5,6 +5,9 @@ import flight.reservation.flight.Schedule;
 import flight.reservation.flight.ScheduledFlight;
 import flight.reservation.order.FlightOrder;
 import flight.reservation.payment.CreditCard;
+import flight.reservation.payment.PaymentContext;
+import flight.reservation.payment.Paypal;
+import flight.reservation.plane.Helicopter;
 import flight.reservation.plane.HelicopterFactory;
 import flight.reservation.plane.PassengerPlaneFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -114,6 +117,7 @@ public class ScenarioTest {
                 @Test
                 @DisplayName("then the booking should succeed")
                 void thenTheBookingShouldSucceed() throws NoSuchFieldException {
+                    PaymentContext paymentContext = new PaymentContext(new Paypal(customer.getEmail(), "amanda1985"));
                     ScheduledFlight scheduledFlight = schedule.searchScheduledFlight(flight.getNumber());
                     FlightOrder order = customer.createOrder(Arrays.asList("Amanda", "Max"),
                             Arrays.asList(scheduledFlight), 180);
@@ -128,7 +132,13 @@ public class ScenarioTest {
                     assertFalse(order.isClosed());
                     assertEquals(order, customer.getOrders().get(0));
 
-                    boolean isProcessed = order.processOrderWithPayPal(customer.getEmail(), "amanda1985");
+                    boolean isProcessed = false;
+                    try {
+                        isProcessed = paymentContext.processPayment(order);
+                    } catch (Exception e) {
+                        fail("Payment should not fail");
+                    }
+
                     assertTrue(isProcessed);
                     assertTrue(order.isClosed());
                 }
@@ -168,9 +178,10 @@ public class ScenarioTest {
             @Test
             @DisplayName("then the payment should not succeed and the booking should not be closed/payed")
             void thenThePaymentAndBookingShouldNotSucceed() {
+                PaymentContext paymentContext = new PaymentContext(creditCard);
                 ScheduledFlight scheduledFlight = schedule.searchScheduledFlight(flight.getNumber());
                 FlightOrder order = customer.createOrder(Arrays.asList("Max"), Arrays.asList(scheduledFlight), 100);
-                assertThrows(IllegalStateException.class, () -> order.processOrderWithCreditCard(creditCard));
+                assertThrows(IllegalStateException.class, () -> paymentContext.processPayment(order));
                 assertFalse(order.isClosed());
             }
         }
@@ -187,9 +198,10 @@ public class ScenarioTest {
             @Test
             @DisplayName("then the booking should not be closed/payed")
             void thenTheBookingShouldNotSucceed() {
+                PaymentContext paymentContext = new PaymentContext(creditCard);
                 ScheduledFlight scheduledFlight = schedule.searchScheduledFlight(flight.getNumber());
                 FlightOrder order = customer.createOrder(Arrays.asList("Max"), Arrays.asList(scheduledFlight), 100);
-                assertThrows(IllegalStateException.class, () -> order.processOrderWithCreditCard(creditCard));
+                assertThrows(IllegalStateException.class, () -> paymentContext.processPayment(order));
                 assertFalse(order.isClosed());
             }
         }
@@ -207,10 +219,18 @@ public class ScenarioTest {
             @Test
             @DisplayName("then the booking should succeed")
             void thenTheBookingShouldSucceed() throws NoSuchFieldException {
+                PaymentContext paymentContext = new PaymentContext(creditCard);
                 ScheduledFlight scheduledFlight = schedule.searchScheduledFlight(flight.getNumber());
                 FlightOrder order = customer.createOrder(Arrays.asList("Max"), Arrays.asList(scheduledFlight), 100);
-                boolean processed = order.processOrderWithCreditCard(creditCard);
-                assertTrue(processed);
+
+                boolean isProcessed = false;
+                try {
+                    isProcessed = paymentContext.processPayment(order);
+                } catch (Exception e) {
+                    fail("Payment should not fail");
+                }
+
+                assertTrue(isProcessed);
                 assertTrue(order.isClosed());
                 assertEquals(order, customer.getOrders().get(0));
                 assertEquals(900, creditCard.getAmount());
