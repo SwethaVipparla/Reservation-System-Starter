@@ -1,4 +1,6 @@
-package flight.reservation.plane;
+package flight.reservation.plane.models;
+
+import flight.reservation.plane.interfaces.Helicopter;
 
 public class H2 implements Helicopter {
     private final int passengerCapacity = 6;

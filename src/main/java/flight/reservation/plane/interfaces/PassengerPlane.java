@@ -1,5 +1,6 @@
-package flight.reservation.plane;
+package flight.reservation.plane.interfaces;
 
+ 
 public interface PassengerPlane {
 
     public String getModel();

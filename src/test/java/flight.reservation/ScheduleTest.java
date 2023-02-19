@@ -3,10 +3,10 @@ package flight.reservation;
 import flight.reservation.flight.Flight;
 import flight.reservation.flight.Schedule;
 import flight.reservation.flight.ScheduledFlight;
-import flight.reservation.plane.Helicopter;
 import flight.reservation.plane.HelicopterFactory;
 import flight.reservation.plane.PassengerDrone;
-import flight.reservation.plane.PassengerPlane;
+import flight.reservation.plane.interfaces.PassengerPlane;
+import flight.reservation.plane.PassengerPlaneFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -56,7 +56,8 @@ public class ScheduleTest {
         @Test
         @DisplayName("then removing a flight should still yield an empty list")
         void thenScheduleShouldYieldEmpty() {
-            schedule.removeFlight(new Flight(1, new Airport("a", "a", "a"), new Airport("b", "b", "b"), new PassengerPlane("A380")));
+            schedule.removeFlight(new Flight(1, new Airport("a", "a", "a"), new Airport("b", "b", "b"),
+                    PassengerPlaneFactory.createPassengerPlane("A380")));
             assertEquals(0, schedule.getScheduledFlights().size());
         }
 
@@ -72,7 +73,7 @@ public class ScheduleTest {
                 Airport startAirport = new Airport("Berlin Airport", "BER", "Berlin, Berlin");
                 Airport destAirport = new Airport("Frankfurt Airport", "FRA", "Frankfurt, Hesse");
 
-                PassengerPlane aircraft = new PassengerPlane("A380");
+                PassengerPlane aircraft = PassengerPlaneFactory.createPassengerPlane("A380");
                 flight = new Flight(1, startAirport, destAirport, aircraft);
                 departure = TestUtil.addDays(Date.from(Instant.now()), 3);
                 schedule.scheduleFlight(flight, departure);
@@ -120,17 +121,15 @@ public class ScheduleTest {
                 new Airport("John F. Kennedy International Airport", "JFK", "Queens, New York, New York"),
                 new Airport("Istanbul Airport", "IST", "Arnavutköy, Istanbul"),
                 new Airport("Dubai International Airport", "DXB", "Garhoud, Dubai"),
-                new Airport("Chengdu Shuangliu International Airport", "CTU", "Shuangliu-Wuhou, Chengdu, Sichuan")
-        );
+                new Airport("Chengdu Shuangliu International Airport", "CTU", "Shuangliu-Wuhou, Chengdu, Sichuan"));
 
         List<Flight> flights = Arrays.asList(
-                new Flight(1, airports.get(0), airports.get(1), new PassengerPlane("A350")),
-                new Flight(2, airports.get(1), airports.get(2), new PassengerPlane("A380")),
-                new Flight(3, airports.get(2), airports.get(4), new PassengerPlane("Embraer 190")),
-                new Flight(4, airports.get(3), airports.get(2), new PassengerPlane("Antonov AN2")),
+                new Flight(1, airports.get(0), airports.get(1), PassengerPlaneFactory.createPassengerPlane("A350")),
+                new Flight(2, airports.get(1), airports.get(2), PassengerPlaneFactory.createPassengerPlane("A380")),
+                new Flight(3, airports.get(2), airports.get(4), PassengerPlaneFactory.createPassengerPlane("Embraer 190")),
+                new Flight(4, airports.get(3), airports.get(2), PassengerPlaneFactory.createPassengerPlane("Antonov AN2")),
                 new Flight(5, airports.get(4), airports.get(2), HelicopterFactory.getHelicopter("H1")),
-                new Flight(6, airports.get(5), airports.get(7), new PassengerDrone("HypaHype"))
-        );
+                new Flight(6, airports.get(5), airports.get(7), new PassengerDrone("HypaHype")));
 
         @BeforeEach
         void initializeSchedule() throws ParseException {
@@ -165,11 +164,16 @@ public class ScheduleTest {
             void thenTheCorrectFlightShouldBeRemoved() {
                 Flight flight = flights.get(3);
                 schedule.removeFlight(flight);
-                assertTrue(schedule.getScheduledFlights().stream().anyMatch(o -> o.getNumber() == flights.get(0).getNumber()));
-                assertTrue(schedule.getScheduledFlights().stream().anyMatch(o -> o.getNumber() == flights.get(1).getNumber()));
-                assertTrue(schedule.getScheduledFlights().stream().anyMatch(o -> o.getNumber() == flights.get(2).getNumber()));
-                assertTrue(schedule.getScheduledFlights().stream().anyMatch(o -> o.getNumber() == flights.get(4).getNumber()));
-                assertFalse(schedule.getScheduledFlights().stream().anyMatch(o -> o.getNumber() == flights.get(3).getNumber()));
+                assertTrue(schedule.getScheduledFlights().stream()
+                        .anyMatch(o -> o.getNumber() == flights.get(0).getNumber()));
+                assertTrue(schedule.getScheduledFlights().stream()
+                        .anyMatch(o -> o.getNumber() == flights.get(1).getNumber()));
+                assertTrue(schedule.getScheduledFlights().stream()
+                        .anyMatch(o -> o.getNumber() == flights.get(2).getNumber()));
+                assertTrue(schedule.getScheduledFlights().stream()
+                        .anyMatch(o -> o.getNumber() == flights.get(4).getNumber()));
+                assertFalse(schedule.getScheduledFlights().stream()
+                        .anyMatch(o -> o.getNumber() == flights.get(3).getNumber()));
             }
         }
 
@@ -183,10 +187,14 @@ public class ScheduleTest {
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
                 Date departure = TestUtil.addDays(format.parse("2020-01-01"), 20);
                 schedule.scheduleFlight(flights.get(3), departure);
-                assertEquals(flights.get(3).getNumber(), schedule.getScheduledFlights().get(schedule.getScheduledFlights().size() - 1).getNumber());
-                assertEquals(flights.get(3).getArrival(), schedule.getScheduledFlights().get(schedule.getScheduledFlights().size() - 1).getArrival());
-                assertEquals(flights.get(3).getDeparture(), schedule.getScheduledFlights().get(schedule.getScheduledFlights().size() - 1).getDeparture());
-                assertEquals(departure, schedule.getScheduledFlights().get(schedule.getScheduledFlights().size() - 1).getDepartureTime());
+                assertEquals(flights.get(3).getNumber(),
+                        schedule.getScheduledFlights().get(schedule.getScheduledFlights().size() - 1).getNumber());
+                assertEquals(flights.get(3).getArrival(),
+                        schedule.getScheduledFlights().get(schedule.getScheduledFlights().size() - 1).getArrival());
+                assertEquals(flights.get(3).getDeparture(),
+                        schedule.getScheduledFlights().get(schedule.getScheduledFlights().size() - 1).getDeparture());
+                assertEquals(departure, schedule.getScheduledFlights().get(schedule.getScheduledFlights().size() - 1)
+                        .getDepartureTime());
             }
         }
 
@@ -199,9 +207,12 @@ public class ScheduleTest {
             void thenTheFlightShouldBeReturned() throws ParseException {
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
                 Date departure = TestUtil.addDays(format.parse("2020-01-01"), 2);
-                assertEquals(flights.get(1).getNumber(), schedule.searchScheduledFlight(flights.get(1).getNumber()).getNumber());
-                assertEquals(flights.get(1).getArrival(), schedule.searchScheduledFlight(flights.get(1).getNumber()).getArrival());
-                assertEquals(flights.get(1).getDeparture(), schedule.searchScheduledFlight(flights.get(1).getNumber()).getDeparture());
+                assertEquals(flights.get(1).getNumber(),
+                        schedule.searchScheduledFlight(flights.get(1).getNumber()).getNumber());
+                assertEquals(flights.get(1).getArrival(),
+                        schedule.searchScheduledFlight(flights.get(1).getNumber()).getArrival());
+                assertEquals(flights.get(1).getDeparture(),
+                        schedule.searchScheduledFlight(flights.get(1).getNumber()).getDeparture());
                 assertEquals(departure, schedule.searchScheduledFlight(flights.get(1).getNumber()).getDepartureTime());
             }
 
