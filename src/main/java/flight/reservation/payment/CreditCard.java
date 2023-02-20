@@ -34,6 +34,7 @@ public class CreditCard implements PaymentStrategy {
         this.valid = number.length() > 0 && date.getTime() > System.currentTimeMillis() && !cvv.equals("000");
     }
 
+    @Override
     public boolean pay(double amount) throws IllegalStateException {
         // validate payment information
         if (!cardIsPresentAndValid(this)) {
